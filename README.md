@@ -17,6 +17,14 @@ mirai-cpp 的说明文档：[使用说明](https://github.com/cyanray/mirai-cpp/
 
 ## 用法
 
+首先创建配置文件，在当前目录下创建一个名为`settings.txt`的文件，第一行为`authKey`，第二行为bot的QQ号，第三行为目标QQ群号，例如
+```bash
+AUTHKEY
+1145144396
+1919810777
+```
+
+运行
 ```bash
 ./qqmessagesender "message"
 ```

@@ -5,10 +5,24 @@
 // 如果有人在群里撤回，那么机器人会把撤回的内容再发出来
 
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <mirai.h>
-#include <mirai/third-party/nlohmann/json.hpp>
 #include "myheader.h"
+
+uint64_t getull(std::string &str)
+{
+	uint64_t ret = 0;
+	try
+	{
+		ret = std::stoull(str, nullptr, 10);
+	}
+	catch (...)
+	{
+		return 0;
+	}
+	return ret;
+}
 
 int main(int argc, char *argv[])
 {
@@ -20,13 +34,52 @@ int main(int argc, char *argv[])
 	system("chcp 65001");
 #endif
 
+	if (argc != 2)
+	{
+		std::cout << "WRONG ARGS" << std::endl;
+		return 0;
+	}
+
+	std::string authKey = "";
+	std::string QQstr = "";
+	std::string Gstr = "";
+
+	std::fstream settings;
+	try
+	{
+		settings.open("settings.txt", std::fstream::in);
+	}
+	catch (...)
+	{
+		std::cout << "Cannot open settings.txt" << std::endl;
+		return 0;
+	}
+	settings >> authKey;
+	settings >> QQstr;
+	settings >> Gstr;
+	settings.close();
+
+	uint64_t QQuint = getull(QQstr);
+	if (QQuint == 0)
+	{
+		std::cout << "Invalid QQ number" << std::endl;
+		return 0;
+	}
+	uint64_t Guint = getull(Gstr);
+	if (Guint == 0)
+	{
+		std::cout << "Invalid Group number" << std::endl;
+		return 0;
+	}
+	Cyan::QQ_t botQQ = Cyan::QQ_t(QQuint);
+	Cyan::GID_t GQQ = Cyan::GID_t(Guint);
+
 	MiraiBot bot("127.0.0.1", 8080);
 	while (true)
 	{
 		try
 		{
-			bot.Auth("AUTHKEY", 00000000_qq);
-			// Fill Authkey and QQbot number
+			bot.Auth(authKey, botQQ);
 			break;
 		}
 		catch (const std::exception &ex)
@@ -37,18 +90,10 @@ int main(int argc, char *argv[])
 	}
 	cout << "Bot Working..." << endl;
 
-	if (argc != 2)
-	{
-		std::cout << "WRONG ARGS" << std::endl;
-		return 0;
-	}
-	else
-	{
-		std::string message = argv[1];
-		Cyan::MessageChain msg = MessageChain().Plain(message);
-		bot.SendMessage(00000000_gid, msg);
-		// Fill target QQ group ID
-	}
+	std::string message = argv[1];
+	Cyan::MessageChain msg = MessageChain().Plain(message);
+	bot.SendMessage(GQQ, msg);
 	std::cout << "Complete" << std::endl;
+
 	return 0;
 }

@@ -56,7 +56,6 @@ bool getPic(std::vector<std::string> &url, std::string &curTime)
 		{
 			fileName += picurl[i];
 		}
-		// std::string curlcmd = "curl -o" + curPath + "/cache/" + curTime + "/" + fileName + picurl;
 		std::string curlcmd = "curl " + picurl + " -o ./cache/" + curTime + "/" + fileName;
 		system(curlcmd.c_str());
 		std::cout << curlcmd << std::endl;
@@ -67,18 +66,15 @@ bool getPic(std::vector<std::string> &url, std::string &curTime)
 
 bool AddPictures(Cyan::MiraiBot &bot, std::vector<std::string> &picCache, Cyan::MessageChain &msg)
 {
-	int count = 0;
 	if (picCache.size() == 0)
 	{
 		return false;
 	}
 	for (auto cache : picCache)
 	{
-		count++;
 		Cyan::GroupImage img = bot.UploadGroupImage(cache);
 		msg = msg + Cyan::MessageChain().Image(img);
 	}
-	std::cout << count << std::endl;
 	return true;
 }
 
@@ -139,37 +135,44 @@ int main(int argc, char *argv[])
 	cout << "Bot Working..." << endl;
 
 	std::string title = "", body = "", url = "";
+	std::vector<std::string> picurl;
 	std::fstream msgFile;
 	std::stringstream sstp;
-	msgFile.open("msgTitle.txt");
-	sstp << msgFile.rdbuf();
-	title = sstp.str();
-	sstp.clear();
-	sstp.str("");
-	msgFile.close();
-
-	msgFile.open("msgBody.txt");
-	sstp << msgFile.rdbuf();
-	body = sstp.str();
-	sstp.clear();
-	sstp.str("");
-	msgFile.close();
-
-	msgFile.open("msgURL.txt");
-	sstp << msgFile.rdbuf();
-	url = sstp.str();
-	sstp.clear();
-	sstp.str("");
-	msgFile.close();
-
-	msgFile.open("msgPicURL.txt");
-	std::vector<std::string> picurl;
-	std::string strtp;
-	while (msgFile >> strtp)
+	try
 	{
-		picurl.push_back(strtp);
+		msgFile.open("msgTitle.txt");
+		sstp << msgFile.rdbuf();
+		title = sstp.str();
+		sstp.clear();
+		sstp.str("");
+		msgFile.close();
+
+		msgFile.open("msgBody.txt");
+		sstp << msgFile.rdbuf();
+		body = sstp.str();
+		sstp.clear();
+		sstp.str("");
+		msgFile.close();
+
+		msgFile.open("msgURL.txt");
+		sstp << msgFile.rdbuf();
+		url = sstp.str();
+		sstp.clear();
+		sstp.str("");
+		msgFile.close();
+
+		msgFile.open("msgPicURL.txt");
+		std::string strtp;
+		while (msgFile >> strtp)
+		{
+			picurl.push_back(strtp);
+		}
+		msgFile.close();
 	}
-	msgFile.close();
+	catch (...)
+	{
+		std::cout << "Fail to open message" << std::endl;
+	}
 
 	if (title.empty() || body.empty() || url.empty())
 	{
@@ -181,9 +184,16 @@ int main(int argc, char *argv[])
 	try
 	{
 		Cyan::MessageChain msg = MessageChain().Plain(title + "\n" + body + "\n" + url + "\n");
+		std::vector<Cyan::GroupImage> imgv;
 		if (picurl.size() != 0)
 		{
-			AddPictures(bot, picurl, msg);
+			// AddPictures(bot, picurl, msg);
+			for (auto cache : picurl)
+			{
+				std::cout << cache << std::endl;
+				imgv.push_back(bot.UploadGroupImage(cache));
+				msg = msg + Cyan::MessageChain().Image(imgv.back());
+			}
 		}
 		bot.SendMessage(GQQ, msg);
 		std::cout << "Complete" << std::endl;

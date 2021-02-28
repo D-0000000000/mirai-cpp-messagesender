@@ -1,6 +1,6 @@
 # mirai-cpp-Messagesender
 
- mirai-cpp 发送消息用的机器人
+ mirai-cpp 发送消息用的机器人，配合自动装填机使用https://github.com/D-0000000000/autoloader
 
 ## 使用方法
 
@@ -26,8 +26,11 @@ AUTHKEY
 
 运行
 ```bash
-./qqmessagesender "message"
+./qqmessagesender
 ```
+
+当前目录下的`msgTitle.txt`，`msgBody.txt`，`msgURL.txt`，`msgPicURL.txt` 会被解析并发送至QQ，文件包括图片被移动到`cache`文件夹下，文件夹内以时间命名。更多信息见[autoloader](https://github.com/D-0000000000/autoloader)
+
 ## 依赖
 
 本项目基于https://github.com/cyanray/mirai-cpp/
